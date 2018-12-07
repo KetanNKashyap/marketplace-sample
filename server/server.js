@@ -86,11 +86,35 @@ app.post('/users', (req, res) => {
       end: req.body.end,
       _user: req.user._id
     });
-  
     car.save().then((doc) => {
       req.user.tags.includes("beta") ? res.send('Car has been listed successfully in the marketplace'): res.send('Car shall be listed in the marketplace post approval');
     }, (e) => {
       res.status(400).send(e);
+    });
+  });
+
+  app.get('/cars', authenticate, (req, res) => {
+    Car.find({
+      _user: req.user._id
+    }).then((cars) => {
+      res.send({cars});
+    }, (e) => {
+      res.status(400).send(e);
+    });
+  });
+
+  app.get('/cars/:featured', authenticate, (req, res) => {
+    var featured = req.params.featured;
+    Car.find({
+      featured: featured === "featured" ?true:false,
+      _user: req.user._id
+    }).then((cars) => {
+      if (!cars) {
+        return res.status(404).send();
+      }
+      res.send({cars});
+    }).catch((e) => {
+      res.status(400).send();
     });
   });
 
